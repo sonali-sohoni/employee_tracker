@@ -19,8 +19,8 @@ inquirer
 				"View All Employees",
 				"Add A Department",
 				"Add A Role",
-				"Add A Employee",
-				"Update Employee Role",
+				"Add An Employee",
+				"Update Employee's Role",
 			],
 		},
 	])
@@ -50,8 +50,10 @@ left join employee m on e.manager_id = m.id`;
 			addNewDepartment();
 		} else if (opt_select === "Add A Role") {
 			addNewRole();
-		} else if (opt_select === "Add A Employee") {
+		} else if (opt_select === "Add An Employee") {
 			addNewEmployee();
+		} else if (opt_select === "Update Employee's Role") {
+			updateEmployeeRole();
 		}
 	});
 
@@ -204,6 +206,7 @@ const addNewEmployee = function () {
 		});
 		console.log(emp_arr);
 	});
+	emp_arr.push("none");
 	inquirer
 		.prompt([
 			{
@@ -240,7 +243,8 @@ const addNewEmployee = function () {
 			{
 				type: "list",
 				name: "manager",
-				message: "Please enter the employee's manager -",
+				message:
+					"Please select the employee's manager - select none if employee does not have manager assigned.",
 				choices: emp_arr,
 			},
 		])
@@ -249,12 +253,13 @@ const addNewEmployee = function () {
 			console.log(data);
 			// 		//(" Engineer",80000.00,2),
 			const roleid = data.role.split("_")[0];
-			const managerid = data.manager.split("_")[0];
+			let managerid = null;
+			if (data.manager !== "none") managerid = data.manager.split("_")[0];
 			let sql =
 				"insert into employee (first_name,last_name,role_id,manager_id)values (?,?,?,?)";
 			let params = [data.fname, data.lname, roleid, managerid];
 			console.log(!data.manager_id);
-			if (!data.manager) {
+			if (!managerid) {
 				sql =
 					"insert into employee (first_name,last_name,role_id)values (?,?,?)";
 				params = [data.fname, data.lname, roleid];
@@ -276,5 +281,75 @@ const addNewEmployee = function () {
 				})
 				.catch(console.log)
 				.then(() => db.end());
+		});
+};
+const updateEmployeeRole = function () {
+	let role_arr = [];
+	let emp_arr = [];
+	const questions = [
+		{
+			type: "list",
+			name: "emp",
+			message: "Please select the employee from the list -",
+			choices: emp_arr,
+		},
+		{
+			type: "list",
+			name: "role",
+			message: "Please select the employee's new role -",
+			validate: (arg) => {
+				if (!arg) {
+					return false;
+				} else return true;
+			},
+			choices: role_arr,
+		},
+	];
+
+	getQueryResults("select * from role")
+		.then((results) => {
+			//console.log(results);
+
+			results.forEach((obj) => {
+				role_arr.push(obj.id + "_" + obj.title);
+			});
+			console.log(0);
+			console.log(role_arr);
+			return getQueryResults("select * from employee");
+		})
+		.then((results) => {
+			console.log(1);
+			console.log(results);
+
+			results.forEach((obj) => {
+				emp_arr.push(obj.id + "_" + obj.first_name + " " + obj.last_name);
+			});
+
+			return inquirer.prompt(questions);
+		})
+		.then((data) => {
+			console.log(data);
+			// 		//(" Engineer",80000.00,2),
+			const roleid = data.role.split("_")[0];
+			empid = data.emp.split("_")[0];
+			let sql = "update employee set role_id = ? where id = ?";
+			let params = [roleid, empid];
+
+			console.log(sql, params);
+			return db.promise().query(sql, params);
+		})
+		.then(([rows, fields]) => {
+			console.log(rows);
+			if (!rows.affectedRows) {
+				console.log("Can not add new employee");
+				return;
+			} else {
+				console.log("Selected employee's role has been successfully updated.");
+				printResults("View All Employees", "select * from employee");
+			}
+		})
+		.catch((err) => {
+			console.log(e);
+			db.end();
 		});
 };
