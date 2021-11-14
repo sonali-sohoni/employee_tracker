@@ -30,21 +30,14 @@ const processUserPrompts = (opt_select) => {
 	if (opt_select === "View All Departments") {
 		printResults(opt_select, "select * from department");
 	} else if (opt_select === "View All Roles") {
-		console.log("2");
 		const sq = `SELECT role.id,role.title as job_title,role.salary,department.dept_name FROM company_db.role left join department on role.department_id = department.id`;
 		printResults(opt_select, sq);
-		console.log("v1");
 	} else if (opt_select === "View All Employees") {
 		const sq = `select e.id,e.first_name,e.last_name ,r.title,d.dept_name,r.salary, concat(m.first_name, " ",m.last_name) as manager from
 employee e  left join role r on e.role_id = r.id
 left join department d on r.department_id = d.id
 left join employee m on e.manager_id = m.id`;
 		printResults(opt_select, sq);
-		// getQueryResults(opt_select, sq).then((results) => {
-		// 	console.table("my returned results");
-		// 	console.table(results);
-		// });
-		//	printResults(opt_select, sq);
 	} else if (opt_select === "Add A Department") {
 		addNewDepartment();
 	} else if (opt_select === "Add A Role") {
@@ -71,7 +64,6 @@ const getUserPrompts = () => {
 				"Add A Role",
 				"Add An Employee",
 				"Update Employee's Role",
-				"View Employees By Manager",
 				"Exit",
 			],
 		},
@@ -166,10 +158,6 @@ const addNewRole = function () {
 			dept_names.push(obj.dept_name);
 		});
 		console.log(dept_arr2);
-		// results.forEach((obj) => {
-		// 	dept_arr.push(obj.id + "_" + obj.dept_name);
-		// });
-		//	console.log(dept_arr);
 	});
 	inquirer
 		.prompt([
@@ -245,23 +233,12 @@ const addNewEmployee = function () {
 			role_arr2.push(obj);
 			role_names.push(obj.title);
 		});
-		//console.log(role_arr2);
-		// results.forEach((obj) => {
-		// 	role_arr.push(obj.id + "_" + obj.title);
-		// });
-		//	console.log(dept_arr);
 	});
 	getQueryResults("select * from employee").then((results) => {
-		//console.log(results);
-
-		// results.forEach((obj) => {
-		// 	emp_arr.push(obj.id + "_" + obj.first_name + " " + obj.last_name);
-		// });
 		results.forEach((obj) => {
 			emp_arr2.push(obj);
 			emp_names.push(obj.first_name + " " + obj.last_name);
 		});
-		//	console.log(emp_arr2);
 	});
 	emp_names.push("none");
 	inquirer
@@ -391,21 +368,15 @@ const updateEmployeeRole = function () {
 			return getQueryResults("select * from employee");
 		})
 		.then((results) => {
-			// console.log(1);
-			// console.log(results);
-
-			// results.forEach((obj) => {
-			// 	emp_arr.push(obj.id + "_" + obj.first_name + " " + obj.last_name);
-			// });
 			results.forEach((obj) => {
 				emp_arr2.push(obj);
 				emp_names.push(obj.first_name + " " + obj.last_name);
 			});
-			console.log(emp_arr2);
+			//	console.log(emp_arr2);
 			return inquirer.prompt(questions);
 		})
 		.then((data) => {
-			console.log(data);
+			//	console.log(data);
 			// 		//(" Engineer",80000.00,2),
 			//	const roleid = data.role.split("_")[0];
 			const roleindex = role_names.findIndex((val) => val === data.role);
@@ -417,11 +388,11 @@ const updateEmployeeRole = function () {
 			let sql = "update employee set role_id = ? where id = ?";
 			let params = [roleid, empid];
 
-			console.log(sql, params);
+			//		console.log(sql, params);
 			return db.promise().query(sql, params);
 		})
 		.then(([rows, fields]) => {
-			console.log(rows);
+			//		console.log(rows);
 			if (!rows.affectedRows) {
 				console.log("Can not add new employee");
 				return;
