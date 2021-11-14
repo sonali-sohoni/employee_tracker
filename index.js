@@ -143,8 +143,9 @@ const addNewDepartment = function () {
 						printResults("View All Departments", "select * from department");
 					}
 				})
-				.catch(console.log)
-				.then(() => db.end());
+				.catch((err) => {
+					console.log(err);
+				});
 		});
 };
 
@@ -285,15 +286,20 @@ const addNewEmployee = function () {
 		])
 
 		.then((data) => {
-			//	console.log(data);
+			//		console.log(data);
 			// 		//(" Engineer",80000.00,2),
 			//const roleid = data.role.split("_")[0];
+			//		console.log(emp_names);
+			//		console.log(emp_arr2);
 			const roleindex = role_names.findIndex((val) => val === data.role);
 			const roleid = role_arr2[roleindex].id;
 			//	console.log("Selected roleid =" + roleid);
 			let managerid = null;
 			if (data.manager !== "none") {
-				const empindex = emp_names.findIndex((val) => val === data.manager);
+				const empindex = emp_arr2.findIndex(
+					(obj) => obj.first_name + " " + obj.last_name === data.manager
+				);
+				//		console.log("Selected empindex =" + empindex);
 				managerid = emp_arr2[empindex].id;
 				//		console.log("Selected empid =" + managerid);
 			} //managerid = data.manager.split("_")[0];
@@ -321,8 +327,9 @@ const addNewEmployee = function () {
 						printResults("View All Employees", "select * from employee");
 					}
 				})
-				.catch(console.log)
-				.then(() => db.end());
+				.catch((err) => {
+					console.log(err);
+				});
 		});
 };
 const updateEmployeeRole = function () {
